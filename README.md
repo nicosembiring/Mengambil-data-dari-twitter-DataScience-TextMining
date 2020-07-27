@@ -1,0 +1,1 @@
+Code ini dibuat untuk dapat mengambil data dari Twitter

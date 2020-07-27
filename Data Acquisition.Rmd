@@ -1,0 +1,87 @@
+---
+title: "Tugas Besar"
+author: "Nico Sembiring"
+date: "7/18/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+setwd("F:/##/##/###/###/###")
+```
+
+```{r}
+library("rtweet")
+library("dplyr")
+library("tidyr")
+library("network")
+```
+
+```{r}
+# Set keword dan jumlah tweet yang akan dicari
+keyword <- "Covid-19 OR Papua"
+jumlahtweet <- 1000
+type <- "recent"
+bahasa <- "id"
+```
+
+```{r}
+# Bila ingin Mengambil Retweet tuliskan "TRUE", bila tidak tuliskan "FALSE"
+retweet <- FALSE
+```
+
+```{r}
+# Autentifikasi API
+token <- create_token(
+  app = "##############",
+  consumer_key = "#####################",
+  consumer_secret = "#############################",
+  access_token = "################################",
+  access_secret = "#################################")
+```
+
+```{r}
+# Mencari tweet
+crawling <- search_tweets(keyword,
+                          n = jumlahtweet,
+                          include_rts = retweet,
+                          type = type,
+                          lang = bahasa,
+                          retryonratelimit = FALSE)
+```
+
+```{r}
+#Save Sebagai CSV
+write_as_csv(crawling, "data_mentah_covid19_papua_fix.csv", prepend_ids = TRUE, na = "",fileEncoding = "UTF-8")
+
+```
+
+```{r}
+# Mengambil data dengan kriteria tertentu (jumlah followers)
+selected <- filter(crawling, followers_count > 100)
+
+# Membuat edge list
+edgelist <- select(selected, screen_name, mentions_screen_name)
+
+# Memisahkan target jika terjadi duplikasi
+edgelist <- edgelist %>% unnest(mentions_screen_name)
+
+# Menghilangkan baris kosong
+edgelist <- na.exclude(edgelist)
+
+View(edgelist)
+
+#Save sebagai CSV hanya berisi edge dan list
+write.table(edgelist, file = "data_edge_node_covid19_papua_fix.csv",
+            quote = FALSE, sep = ",",
+            col.names = FALSE, row.names = FALSE)
+
+```
+
